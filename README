@@ -1,0 +1,17 @@
+C++ multithreaded lock less queue implementation of both un-bounded (fifo)
+and bounded (circular) queues where multiple dummy exchange objects enqueue 
+trades and their strategy objects deque them.
+
+We can have multiple producers (exchanges) to consumers (strategies) sinks as
+shown in the demo.
+
+Requirements:
+
+The setup requires google benchmark packages to be installed and assumes
+C++ 20 compiler to be present to build the code.
+For google benchmark: google...
+
+Makefile Targets:
+
+all: default target which has queue semantics mentioned above
+benchmark: uses google benchmark to benchmark the program
