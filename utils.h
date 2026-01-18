@@ -91,32 +91,20 @@ using TradePtr = std::unique_ptr<Trade>;
 using Traits = TypeTraits<TradePtr>;
 
 // Distribution selection semantics...
-//#if __cplusplus >= 202002L
 template <typename T> struct distribution;
-//#else
-//template <typename T, typename X=void> struct distribution;
-//#endif
 
 // Pick this one if using int
 template <typename T>
-//#if __cplusplus >= 202002L
 requires std::integral<T>
 struct distribution<T>
-//#else
-//struct distribution<T, typename std::enable_if<std::is_integral<T>::value>::type>
-//#endif
 {
    using type = std::uniform_int_distribution<T>; 
 };
 
 // Pick this one if using double
 template <typename T> 
-//#if __cplusplus >= 202002L
 requires std::floating_point<T>
 struct distribution<T>
-//#else
-//struct distribution<T, typename std::enable_if<std::is_floating_point<T>::value>::type>
-//#endif
 { 
    using type = std::uniform_real_distribution<T>; 
 };
