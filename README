@@ -5,6 +5,8 @@ trades and their strategy objects deque them.
 We can have multiple producers (exchanges) to consumers (strategies) sinks as
 shown in the demo.
 
+Utilizes compile time polymorphism based on variant implementation.
+
 Requirements:
 
 The setup requires google benchmark packages to be installed and assumes
