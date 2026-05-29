@@ -5,6 +5,8 @@
 #include <memory>
 #include <thread>
 #include <chrono>
+#include <variant>
+#include <ranges>
 
 #include "utils.h"
 
@@ -50,8 +52,11 @@ public:
    {
       if (jthread_)
       {
-         jthread_->join();
-         jthread_.reset();
+         if (jthread_->joinable())
+         {
+            jthread_->join();
+            jthread_.reset();
+         }
       }
    }
 
@@ -171,23 +176,24 @@ void run_main()
    {
       double vola = 0.10; // 10%
 
+      // compile time polymorphism
+      using ExchangeP = std::unique_ptr<Exchange>;
+      using StrategyP = std::unique_ptr<Strategy>;
+      using Runner = std::variant<ExchangeP, StrategyP>;
+      using Runners = std::vector<Runner>;
+
+      Runners runners;
       // Set 1 Exchanges and Strategy sink
-      Exchange exchange1 {"MSFTO.O", 490.0, 10000, vola, task_queue_1, 2000000};
-      Exchange exchange2 {"AAPL.OQ", 230.0, 15000, vola, task_queue_1, 1000000};
-      Strategy strategy1 {"S1", task_queue_1, 3000000};
+      runners.emplace_back(std::make_unique<Exchange>("MSFTO.O", 490.0, 10000, vola, task_queue_1, 2000000));
+      runners.emplace_back(std::make_unique<Exchange>("AAPL.OQ", 230.0, 15000, vola, task_queue_1, 1000000));
+      runners.emplace_back(std::make_unique<Strategy>("S1", task_queue_1, 3000000));
 
       // Set 2 Exchanges and Strategy sink
-      Exchange exchange3 {"NVDA.O" , 174.8, 20000, vola, task_queue_2, 1000000};
-      Exchange exchange4 {"META.O" , 724.5, 21000, vola, task_queue_2, 1000000};
-      Strategy strategy2 {"S2", task_queue_2, 2000000};
+      runners.emplace_back(std::make_unique<Exchange>("NVDA.O" , 174.8, 20000, vola, task_queue_2, 1000000));
+      runners.emplace_back(std::make_unique<Exchange>("META.O" , 724.5, 21000, vola, task_queue_2, 1000000));
+      runners.emplace_back(std::make_unique<Strategy>("S2", task_queue_2, 2000000));
 
-      exchange1.run();
-      exchange2.run();
-      strategy1.run();
-
-      exchange3.run();
-      exchange4.run();
-      strategy2.run();
+      std::for_each(runners.begin(), runners.end(), [] (auto& rv) { std::visit([] (auto&& r) {r->run();}, rv); });
 
       //std::this_thread::sleep_for(std::chrono::seconds(3));
 
