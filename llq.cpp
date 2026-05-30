@@ -194,10 +194,8 @@ void run_main()
       runners.emplace_back(std::make_unique<Strategy>("S2", task_queue_2, 2000000));
 
       std::for_each(runners.begin(), runners.end(), [] (auto& rv) { std::visit([] (auto&& r) {r->run();}, rv); });
-
-      //std::this_thread::sleep_for(std::chrono::seconds(3));
-
-   } // all threads join on destruction, no need for explicit join
+      std::for_each(runners.begin(), runners.end(), [] (auto& rv) { std::visit([] (auto&& r) {r->join();}, rv); });
+   }
 }
 
 #ifndef BENCHMARK_LLQ
